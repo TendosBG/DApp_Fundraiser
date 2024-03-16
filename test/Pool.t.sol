@@ -15,6 +15,9 @@ contract PoolTest is Test{
 
     Pool pool;
 
+    // Define the event at the contract level
+    event LogTimestamp(bytes32 message);
+
 
     function setUp() public {
         vm.prank(owner);
@@ -27,6 +30,22 @@ contract PoolTest is Test{
         assertEq(pool.end(), block.timestamp + duration);
         assertEq(pool.goal(), goal);
         assertEq(pool.totalCollected(), 0);
+    }
+
+    // Contribute
+
+    function test_RevertWhen_EndIsReached() public {
+        vm.warp(pool.end() +3600);
+        
+        
+        bytes4 selector = bytes4(keccak256("CollectIsFinished()"));
+        
+        vm.expectRevert(abi.encodeWithSelector(selector));
+
+        vm.prank(user);
+        vm.deal(user, 1 ether);
+        pool.contribute{value: 1 ether}();
+
     }
 
 }

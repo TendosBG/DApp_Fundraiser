@@ -40,7 +40,7 @@ contract Pool is Ownable {
 
         contributions[msg.sender] += msg.value;
         totalCollected += msg.value;
-
+        
         emit Contribute(msg.sender, msg.value);
     }
 
