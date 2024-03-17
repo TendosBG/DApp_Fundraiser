@@ -48,4 +48,14 @@ contract PoolTest is Test{
 
     }
 
+    /// @notice Test that the contract reverts when the user sends 0 ether
+    function test_RevertWhen_ZeroFunds() public {
+        bytes4 selector = bytes4(keccak256("NotEnoughFunds()"));
+        
+        vm.expectRevert(abi.encodeWithSelector(selector));
+
+        vm.prank(user);
+        pool.contribute{value: 0}();
+    }
+
 }
