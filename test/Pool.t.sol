@@ -162,4 +162,71 @@ contract PoolTest is Test{
 
     //reprendre à 1h35m30s
 
+    // Refund
+
+    
+    function test_RevertWhen_RefundButEndNotReached() public{
+        vm.prank(user);
+        vm.deal(user, 6 ether);
+        pool.contribute{value : 6 ether}();
+
+        bytes4 selector = bytes4(keccak256("CollectNotFinished()"));
+        vm.expectRevert(abi.encodeWithSelector(selector));
+
+        pool.refund();
+    }
+
+    function test_RevertWhen_RefundButGoalReached() public{
+        vm.prank(user);
+        vm.deal(user, 6 ether);
+        pool.contribute{value : 6 ether}();
+        vm.prank(user2);
+        vm.deal(user2, 5 ether);
+        pool.contribute{value : 5 ether}();
+
+        vm.warp(pool.end() +3600);
+
+        bytes4 selector = bytes4(keccak256("GoalAlreadyReached()"));
+        vm.expectRevert(abi.encodeWithSelector(selector));
+
+        pool.refund();
+    }
+
+    function test_RevertWhen_RefundButNoContributions() public{
+        vm.prank(user);
+        vm.deal(user, 6 ether);
+        pool.contribute{value : 6 ether}();
+
+        vm.warp(pool.end() +3600);
+
+        bytes4 selector = bytes4(keccak256("NoContribution()"));
+        vm.expectRevert(abi.encodeWithSelector(selector));
+
+        vm.prank(user3);
+        pool.refund();
+    }
+
+    function test_RevertWhen_RefundFailedToSendEther() public {
+        pool = new Pool(duration, goal);
+        pool.contribute{value: 6 ether}();
+
+        vm.warp(pool.end() + 3600);
+
+        bytes4 selector = bytes4(keccak256("FailedToSendEther()"));
+        vm.expectRevert(abi.encodeWithSelector(selector));
+        pool.refund();
+    }
+
+
+    function test_refund() public {
+        vm.prank(user);
+        vm.deal(user, 6 ether);
+        pool.contribute{value: 6 ether}();
+
+        vm.warp(pool.end() + 3600);
+
+        vm.prank(user);
+        pool.refund();
+    }
+
 }
